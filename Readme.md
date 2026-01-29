@@ -1,6 +1,6 @@
-# GKE Cloud Build to GKE Demo
+# GKE Cloud Build to GKE
 
-End‑to‑end CI/CD example for a minimal Go web service deployed to Google Kubernetes Engine (GKE) using Google Cloud Build, Artifact Registry, and environment‑specific Kubernetes manifests. This repository is intended as a portfolio‑ready reference implementation for DevOps / Cloud Engineering practices on Google Cloud.
+End‑to‑end CI/CD example for a Go web service deployed to Google Kubernetes Engine (GKE) using Google Cloud Build, Artifact Registry, and environment‑specific Kubernetes manifests. This repository is intended as a portfolio‑ready reference implementation for DevOps / Cloud Engineering practices on Google Cloud.
 
 The application is a tiny HTTP server implemented in [`main.go`](main.go) that serves a dynamically generated blue PNG image at the `/blue` endpoint. Container images are built by Cloud Build using the multi‑stage [`Dockerfile`](Dockerfile) and deployed into `dev` and `prod` namespaces via simple Kubernetes `Deployment` manifests.
 
@@ -8,7 +8,7 @@ The application is a tiny HTTP server implemented in [`main.go`](main.go) that s
 
 ## Key Features
 
-- Minimal but realistic Go microservice: [`main()`](main.go:11) and [`blueHandler()`](main.go:16) expose an HTTP endpoint returning an in‑memory PNG.
+- Minimal, realistic Go microservice: [`main()`](main.go:11) and [`blueHandler()`](main.go:16) expose an HTTP endpoint returning an in‑memory PNG.
 - Multi‑stage container build using Distroless runtime image for secure, small containers.
 - GitHub‑driven CI/CD with separate Cloud Build configurations for development and production:
   - [`cloudbuild-dev.yaml`](cloudbuild-dev.yaml) for the `dev` branch.
@@ -223,14 +223,14 @@ At a high level, the system consists of:
 
 ```mermaid
 graph TD
-  Dev[Developer] -->|git push (dev/main)| GH[GitHub Repository]
+  Dev[Developer] -->|git push dev/main| GH[GitHub Repository]
   GH -->|Cloud Build trigger| CB[Google Cloud Build]
   CB -->|Build & Push Image| AR[(Artifact Registry)]
   AR -->|Pull Image| GKE[GKE Cluster]
   GKE -->|Pods in dev namespace| DevNS[dev namespace / Deployment]
   GKE -->|Pods in prod namespace| ProdNS[prod namespace / Deployment]
-  DevUser[Dev / QA User] --> DevSvc[dev Service (LoadBalancer)] --> DevNS
-  EndUser[End User] --> ProdSvc[prod Service (LoadBalancer)] --> ProdNS
+  DevUser[Dev / QA User] --> DevSvc[dev Service LoadBalancer] --> DevNS
+  EndUser[End User] --> ProdSvc[prod Service LoadBalancer] --> ProdNS
 ```
 
 ---
@@ -249,7 +249,7 @@ The application itself has a very small request path:
 flowchart LR
   Client[Client Browser / curl] --> LB[LoadBalancer Service]
   LB --> Pod[Go App Pod]
-  Pod --> Handler[blueHandler()]
+  Pod --> Handler[blueHandler]
   Handler --> Img[Generate 100x100 Blue PNG]
   Img --> Resp[HTTP Response image/png]
 ```
@@ -260,7 +260,7 @@ flowchart LR
 graph LR
   Req[HTTP Request /blue] --> SVC[Service]
   SVC --> POD[Go Container]
-  POD --> FUNC[blueHandler()]
+  POD --> FUNC[blueHandler]
   FUNC --> IMG[image.RGBA Buffer]
   IMG --> PNG[PNG Encoder]
   PNG --> OUT[HTTP Response Body]
@@ -299,8 +299,8 @@ Both pipelines set environment variables to ensure `kubectl` points at the corre
 
 ```mermaid
 flowchart LR
-  DevBranch[Commit to dev] --> DevTrig[Cloud Build Trigger (dev)]
-  MainBranch[Commit to main] --> ProdTrig[Cloud Build Trigger (prod)]
+  DevBranch[Commit to dev] --> DevTrig[Cloud Build Trigger /dev]
+  MainBranch[Commit to main] --> ProdTrig[Cloud Build Trigger /prod]
 
   subgraph DevPipeline[Dev Pipeline]
     DevTrig --> DevBuild[Go Build]
